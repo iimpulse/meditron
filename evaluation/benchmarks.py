@@ -17,6 +17,7 @@ COT_PROMPTS = {
     'medqa': "medqa",
     'medmcqa': "medmcqa",
     'pubmedqa': "pubmedqa",
+    'exomiser': "exomiser"
 }
 
 def benchmark_factory(name):
@@ -38,7 +39,8 @@ def benchmark_factory(name):
         "mmlu_medical": MMLU,
         "mmlu_general": MMLU,
         "truthfulqa": TruthfulQA,
-        "gsm8k": GSM8K
+        "gsm8k": GSM8K,
+        "exomiser": Exomiser
     }
     if name not in factories:
         raise ValueError("Benchmark {} not found. \
@@ -316,6 +318,26 @@ class Benchmark:
         self.generations = pd.read_json(path)
 
 
+class Exomiser(Benchmark):
+    '''
+    Exomiser
+
+    Huggingface card: https://huggingface.co/datasets/apizza/exomiser-benchmark
+    '''
+    def __init__(self, name='exomiser') -> None:
+        super().__init__(name)
+        self.hub_name = 'apizza/exomiser-benchmark'
+        self.dir_name = 'apizza___exomiser-benchmark'
+        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
+        self.splits = ['validation']
+        self.num_options = 4
+
+    @staticmethod
+    def custom_preprocessing(row):
+        row["prompt"] = row['text']
+        row["gold"] = row['text']
+        return row
+ 
 class MedMCQA(Benchmark):
     '''
     MedMCQA is a large-scale, Multiple-Choice Question Answering (MCQA) dataset

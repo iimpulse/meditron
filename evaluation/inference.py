@@ -25,7 +25,8 @@ INSTRUCTIONS = {
     'mmlu_medical': {'task': 'mcq', 'partition': 'test', 'instructions': 'medmcqa'},
     'mmlu_general': {'task': 'mcq', 'partition': 'test', 'instructions': 'medmcqa'},
     "blurb": {'task': 'open', 'partition': 'test', 'instructions': 'open_question'},
-}
+    "exomiser": {'task': 'open', 'partition': 'validation', 'instructions': 'exomiser'}
+    }
 
 INSTRUCTIONS_SIMPLE = {
     'truthfulqa': {'task': 'mcq', 'partition': 'validation', 'instructions': 'mcp', 'cot_col': 'exp'},
@@ -92,7 +93,6 @@ def vllm_infer(client, tokenizer, prompt, stop_seq, max_new_tokens=1024, cot=Fal
         top_p=1.0,
         temperature=temperature,
         stop=stop_seq,
-        use_beam_search=False,
         max_tokens=max_new_tokens,
         logprobs=5
     ))
@@ -217,6 +217,8 @@ def benchmark_preparation(data_obj, partition, args, seed=1234):
             shots=args.shots,
             seed=seed,
             load_cot=args.cot)
+    else:
+        data_obj.preprocessing(partition=partition)
 
     if args.cot:
         data_obj.add_instruction(

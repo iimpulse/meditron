@@ -26,6 +26,7 @@ benchmark_output_type = {
     'blurb': 'ner',
     'gsm8k': 'numeric',
     'truthfulqa': 'boolean',
+    'exomiser': 'mcq'
 }
 
 def load_json(filename):
