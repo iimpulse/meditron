@@ -1,7 +1,7 @@
 {
 	"exomiser": {
 		"system":"",
-		"user": "The answer is:",
+		"user": "The differential diagnosis is:",
 		"type": "task-oriented",
 		"source": ""
 },

@@ -51,20 +51,27 @@ def tokenizer_param(tokenizer, target, shots=0, cot=False, task_type="mcq"):
     :param cot: bool, whether to use chain-or-thought or not
     :param task_type: str, the type of answer to generate (mcq or open)
     """
-    max_new_tokens = len(tokenizer(target, add_special_tokens=True)['input_ids'])
-    stop_seq = ["###"]
-    if tokenizer.eos_token is not None:
-        stop_seq.append(tokenizer.eos_token)
-    if tokenizer.pad_token is not None:
-        stop_seq.append(tokenizer.pad_token)
+    # Necessary to avoid issues that may be present in some phenopacket
+    try:
+        max_new_tokens = len(tokenizer(target, add_special_tokens=True)['input_ids'])
+        stop_seq = ["###"]
+        if tokenizer.eos_token is not None:
+            stop_seq.append(tokenizer.eos_token)
+        if tokenizer.pad_token is not None:
+            stop_seq.append(tokenizer.pad_token)
 
-    if not cot and task_type == "mcq":
-        max_new_tokens = len(tokenizer(target[0], add_special_tokens=False)['input_ids'])
-        if shots > 0:
-            max_new_tokens += 8
-    if cot:
-        max_new_tokens = 1024
+        if not cot and task_type == "mcq":
+            max_new_tokens = len(tokenizer(target[0], add_special_tokens=False)['input_ids'])
+            if shots > 0:
+                max_new_tokens += 8
+        if cot:
+            max_new_tokens = 1024
+        print(max_new_tokens)
+    except:
+        print(f"There may be some issue in tokenizer, tokenizer_param or in the phenopacket {target}!\n")
+        return 1024, ["###"]
 
+    max_new_tokens = 1024
     return max_new_tokens, stop_seq
 
 
@@ -148,7 +155,7 @@ def benchmark_infer(args, tokenizer, data, client=None, seed=1234):
     :param seed: int, the seed to use for few-shot learning, Defaults to 1234
     return: pd.DataFrame, a DataFrame containing the scores for each answer
     """
-    columns_to_save = ['prompt', 'gold']
+    columns_to_save = ["id", 'prompt', 'gold']
     if 'subset' in data.features:
         columns_to_save.append('subset')
     if 'question' in data.features:
@@ -218,7 +225,9 @@ def benchmark_preparation(data_obj, partition, args, seed=1234):
             seed=seed,
             load_cot=args.cot)
     else:
-        data_obj.preprocessing(partition=partition)
+        pass
+        # The following call is redundant
+        #data_obj.preprocessing(partition=partition)
 
     if args.cot:
         data_obj.add_instruction(
@@ -250,7 +259,10 @@ def main(args):
         "model": args.checkpoint,
         "tokenizer": args.checkpoint,
         "trust_remote_code": True,
-        "max_num_seqs": 1024,
+        "max_num_seqs": 1024, # still a bit unclear
+        "max_model_len": 8192, # to avoid filling up memory
+        "gpu_memory_utilization": 0.95, # to avoid filling up memory
+        "enforce_eager": True, # to avoid filling up memory
         "tensor_parallel_size": torch.cuda.device_count(),
     }
 

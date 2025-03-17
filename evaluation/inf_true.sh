@@ -16,7 +16,10 @@ checkpoints=(["mpt"]="mosaicml/mpt-7b" \
 
              ["baseline-70b"]="${CHECKPOINT_DIR}baseline-70b/hf_checkpoints/raw/release/" \
              #["meditron-70b"]="${CHECKPOINT_DIR}meditron-70b/hf_checkpoints/raw/iter_23000/" \
-	     ["meditron-70b"]="epfl-llm/meditron-70b" \
+             #["meditron-70b"]="epfl-llm/meditron-70b"
+	     # Charite cluster uses:
+	     ["meditron-70b"]="/sc-resources/llms/OpenMeditron/Meditron3-70B" \
+
 
              ["baseline-medmcqa"]="${CHECKPOINT_DIR}baseline-7b/hf_checkpoints/instruct/medmcqa/" \
              ["baseline-pubmedqa"]="${CHECKPOINT_DIR}baseline-7b/hf_checkpoints/instruct/pubmedqa/" \
@@ -62,7 +65,7 @@ SC_COT=0
 MULTI_SEED=0
 BACKEND=vllm
 WANDB=1
-BATCH_SIZE=16
+BATCH_SIZE=8
 
 HELP_STR="[--checkpoint=$CHECKPOINT_NAME] [--benchmark=$BENCHMARK] [--help]"
 
@@ -139,5 +142,7 @@ if [[ $WANDB = 1 ]]; then
 fi
 
 echo inference.py $COMMON_ARGS
-python inference.py $COMMON_ARGS 
+# For debugging in interactive cluster sessions
+#python -m pdb ${PWD}/evaluation/inference.py $COMMON_ARGS 
+python ${PWD}/evaluation/inference.py $COMMON_ARGS 
 #python evaluate.py $ACC_ARGS

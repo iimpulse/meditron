@@ -210,7 +210,7 @@ class Benchmark:
             if partition == 'train':
                 self.train_data = self.train_data.map(self.custom_preprocessing)
             elif partition in ['test', 'validation']:
-                self.test_data = self.test_data.map(self.custom_preprocessing)
+                self.test_data = self.test_data.map(self.custom_preprocessing, load_from_cache_file=False, keep_in_memory=True)
             else:
                 raise ValueError("Please provide a valid partition split: train or test")
         except Exception as e:
@@ -334,9 +334,12 @@ class Exomiser(Benchmark):
 
     @staticmethod
     def custom_preprocessing(row):
-        row["prompt"] = row['text']
-        row["gold"] = row['text']
-        return row
+        return {
+            "id": row["id"],
+            "prompt": row["prompt"],
+            "gold": row["gold"]
+        }
+        
  
 class MedMCQA(Benchmark):
     '''
